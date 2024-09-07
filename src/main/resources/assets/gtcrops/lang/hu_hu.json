@@ -1,0 +1,13 @@
+{
+  "block.gtcrops.wheat_crop": "Búza Növény",
+  "block.gtcrops.carrot_crop": "Répa Növény",
+  "block.gtcrops.potato_crop": "Krumpli Növény",
+  "block.gtcrops.iron_crop": "Vas Növény",
+  "item.gtcrops.wheat_seed": "Búza Mag",
+  "item.gtcrops.carrot_seed": "Répa Mag",
+  "item.gtcrops.potato_seed": "Krumpli Mag",
+  "item.gtcrops.iron_seed": "Vas Mag",
+  "tooltip.gtcrops.growth": "Növekedés: %s",
+  "tooltip.gtcrops.gain": "Nyereség: %s",
+  "tooltip.gtcrops.tier": "Szint: %s"
+}
