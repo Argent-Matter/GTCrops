@@ -32,32 +32,30 @@ public class GTCropsBlocks {
 
     private static void createCrops() {
         var cropBlocksBuilder = new ImmutableMap.Builder<CropType, BlockEntry<GTCropBlock>>();
-        TYPE_LOOP:
         for (CropType type : GTCropsRegistries.CROP_TYPES) {
             ResourceLocation id = type.id();
-            for (IGTAddon addon : AddonFinder.getAddons()) {
-                if (addon.addonModId().equals(id.getNamespace())) {
-                    BlockEntry<GTCropBlock> block = addon.getRegistrate().block(id.getPath() + "_crop", p -> (GTCropBlock) type.createFunction().apply(type, p))
-                            .properties(p -> p.noCollission()
-                                    .instabreak()
-                                    .mapColor(MapColor.PLANT)
-                                    .randomTicks()
-                                    .sound(SoundType.CROP)
-                                    .pushReaction(PushReaction.DESTROY)
-                                    .noLootTable())
-                            .setData(ProviderType.LANG, NonNullBiConsumer.noop())
-                            .setData(ProviderType.BLOCKSTATE, NonNullBiConsumer.noop())
-                            .setData(ProviderType.LOOT, NonNullBiConsumer.noop())
-                            .addLayer(() -> RenderType::cutoutMipped)
-                            .color(() -> () -> (state, level, pos, index) -> type.tintColor())
-                            .item((b, p) -> new CropSeedItem(b, type, p))
-                            .setData(ProviderType.ITEM_MODEL, NonNullBiConsumer.noop())
-                            .build()
-                            .register();
-                    cropBlocksBuilder.put(type, block);
-                    continue TYPE_LOOP;
-                }
+            IGTAddon addon = AddonFinder.getAddon(id.getNamespace());
+            if (addon == null) {
+                continue;
             }
+            BlockEntry<GTCropBlock> block = addon.getRegistrate().block(id.getPath() + "_crop", p -> (GTCropBlock) type.createFunction().apply(type, p))
+                    .properties(p -> p.noCollission()
+                            .instabreak()
+                            .mapColor(MapColor.PLANT)
+                            .randomTicks()
+                            .sound(SoundType.CROP)
+                            .pushReaction(PushReaction.DESTROY)
+                            .noLootTable())
+                    .setData(ProviderType.LANG, NonNullBiConsumer.noop())
+                    .setData(ProviderType.BLOCKSTATE, NonNullBiConsumer.noop())
+                    .setData(ProviderType.LOOT, NonNullBiConsumer.noop())
+                    .addLayer(() -> RenderType::cutoutMipped)
+                    .color(() -> () -> (state, level, pos, index) -> type.tintColor())
+                    .item((b, p) -> new CropSeedItem(b, type, p))
+                    .setData(ProviderType.ITEM_MODEL, NonNullBiConsumer.noop())
+                    .build()
+                    .register();
+            cropBlocksBuilder.put(type, block);
         }
         CROP_BLOCKS = cropBlocksBuilder.build();
     }
