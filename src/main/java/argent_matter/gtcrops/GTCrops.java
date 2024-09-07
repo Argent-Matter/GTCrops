@@ -3,7 +3,6 @@ package argent_matter.gtcrops;
 import argent_matter.gtcrops.common.blocks.BlocksRegistry;
 import argent_matter.gtcrops.common.blocks.GTCropBlock;
 import argent_matter.gtcrops.common.blocks.GTCropItems;
-import argent_matter.gtcrops.common.data.forge.GTCropsDataGenerator;
 import argent_matter.gtcrops.data.GTCropsDatagen;
 import argent_matter.gtcrops.registry.GTCropsRegistries;
 import com.gregtechceu.gtceu.api.GTCEuAPI;

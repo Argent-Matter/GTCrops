@@ -29,7 +29,7 @@ public class GTCropItems {
                 default -> throw new IllegalArgumentException("Unknown crop type: " + cropTypeName);
             };
 
-            CropType cropType = CropType.fromName(cropTypeName);  // Győződj meg róla, hogy létezik a CropType.fromName() metódus
+            CropType cropType = CropType.fromName(cropTypeName);
             SEEDS.put(cropTypeName, ITEMS.register(cropTypeName + "_seed",
                     () -> new CropSeedItem(cropBlock.get(), cropType, new Item.Properties())));
         }

@@ -26,7 +26,7 @@ public class GTCropBlock extends CropBlock {
     public static final IntegerProperty GAIN = IntegerProperty.create("gain", 1, 31); // Gain stat max 31
 
     private static final Map<Integer, VoxelShape> SHAPES = new HashMap<>();
-    private final CropType cropType;  // CropType, amely tartalmazza a Tier-t is
+    private final CropType cropType;
 
     static {
         SHAPES.put(0, Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D));
@@ -43,7 +43,7 @@ public class GTCropBlock extends CropBlock {
         super(properties);
         this.cropType = cropType;
 
-        // Minden crop 1-1 statokkal indul
+        // Minden crop 1-1 statokkal indul kibaszottul fontos
         this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0).setValue(GROWTH, 1).setValue(GAIN, 1));
     }
 
@@ -59,7 +59,7 @@ public class GTCropBlock extends CropBlock {
 
     @Override
     public boolean isRandomlyTicking(BlockState state) {
-        return true; // A növények növekedési ciklusai
+        return true; // Crop növékedési ciklusok itt és most
     }
 
     @Override
@@ -67,8 +67,8 @@ public class GTCropBlock extends CropBlock {
         int growth = state.getValue(GROWTH);
         int age = state.getValue(AGE);
 
-        if (age >= 3) {  // Csak akkor próbál crossbreedelni, ha a crop Age értéke legalább 3
-            if (random.nextFloat() <= 0.7f) { // 70%-os esély a crossbreedinghez
+        if (age >= 3) {
+            if (random.nextFloat() <= 0.7f) { // 70%-os esély a crossbreedinghez - NemEzanevem (TESTING)
                 BlockPos neighborPos = findNeighboringCropPos(level, pos);
                 if (neighborPos != null) {
                     BlockPos airPos = findAirBlockBetweenCrops(pos, neighborPos);
@@ -76,10 +76,8 @@ public class GTCropBlock extends CropBlock {
 
                     if (airPos != null && canCrossbreedWith(neighborCrop)) {
                         if (this.cropType.getTier() == neighborCrop.cropType.getTier()) {
-                            // Ugyanolyan crop Tier, növekedjen a stat és helyezze el az air blokk helyére
                             createCropWithBetterStats(level, airPos, neighborCrop);
                         } else if (this.cropType.getTier() < 2) {
-                            // Különböző cropok, az új crop max Tier 2-ig fejlődhet
                             createNewCrop(level, airPos, this, neighborCrop);
                         }
                     }
@@ -87,7 +85,6 @@ public class GTCropBlock extends CropBlock {
             }
         }
 
-        // Normál növekedési ciklus
         if (growth >= 22) {
             float weedChance = getWeedChance(growth);
             if (random.nextFloat() <= weedChance) {
@@ -107,7 +104,6 @@ public class GTCropBlock extends CropBlock {
     }
 
     private BlockPos findNeighboringCropPos(Level world, BlockPos pos) {
-        // Szomszédos crop pozíciót keresünk (egyenes és átlós irányokban)
         for (BlockPos offset : new BlockPos[]{
                 pos.north(2), pos.south(2), pos.east(2), pos.west(2),    // Egyenes irányok
                 pos.north(2).west(2), pos.north(2).east(2),              // Átlós irányok
@@ -123,7 +119,6 @@ public class GTCropBlock extends CropBlock {
     }
 
     private BlockPos findAirBlockBetweenCrops(BlockPos pos1, BlockPos pos2) {
-        // Két crop közötti air blokk keresése
         int midX = (pos1.getX() + pos2.getX()) / 2;
         int midY = (pos1.getY() + pos2.getY()) / 2;
         int midZ = (pos1.getZ() + pos2.getZ()) / 2;
@@ -136,14 +131,12 @@ public class GTCropBlock extends CropBlock {
     }
 
     private void createCropWithBetterStats(Level world, BlockPos airPos, GTCropBlock neighborCrop) {
-        // Ellenőrizzük, hogy az airPos valóban üres-e
         BlockState currentState = world.getBlockState(airPos);
         if (!currentState.isAir()) {
             System.out.println("Position is not empty at " + airPos + ", current block is: " + currentState);
-            return; // Ha nem üres a hely, ne helyezzünk el cropot
+            return;
         }
 
-        // Ugyanaz a crop, véletlenszerűen növeljük az egyik statot és helyezzük el az air blokk helyére
         int currentGrowth = this.defaultBlockState().getValue(GROWTH);
         int currentGain = this.defaultBlockState().getValue(GAIN);
 
@@ -165,34 +158,30 @@ public class GTCropBlock extends CropBlock {
         BlockState soilState = world.getBlockState(pos.below());
         if (!soilState.is(BlockTags.DIRT) && !soilState.is(Blocks.FARMLAND)) {
             System.out.println("Invalid soil for crop at " + pos);
-            return; // Ha a talaj nem megfelelő, ne helyezzük el a növényt
+            return;
         }
 
         BlockState currentState = world.getBlockState(pos);
         if (!currentState.isAir()) {
             System.out.println("Position is not empty at " + pos + ", current block is: " + currentState);
-            return; // Ha nem üres a hely, ne helyezzünk el cropot
+            return;
         }
 
-        // Új crop elhelyezése alap statokkal (Growth = 1, Gain = 1)
         world.setBlock(pos, crop1.defaultBlockState().setValue(GROWTH, 1).setValue(GAIN, 1), 2);
         System.out.println("New crop created with default stats at " + pos);
     }
 
     private boolean canCrossbreedWith(GTCropBlock neighborCrop) {
-        // Crossbreeding feltételek: a cropok megfelelő Tier-ekkel rendelkezzenek
         return this.cropType.getTier() == neighborCrop.cropType.getTier()
                 || (this.cropType.getTier() == 1 && neighborCrop.cropType.getTier() <= 2);
     }
 
     private void convertToWeed(Level world, BlockPos pos) {
-        // Parazita crop (Weed) létrehozása
         world.setBlock(pos, new WeedBlock(BlockBehaviour.Properties.of().noCollission().instabreak()).defaultBlockState(), 2);
         System.out.println("Crop at " + pos + " turned into a Weed!");
     }
 
     private float getWeedChance(int growth) {
-        // Weed esély kalkulációja
         switch (growth) {
             case 22: return 0.25f; // 25% esély
             case 23: return 0.50f; // 50% esély
@@ -202,7 +191,6 @@ public class GTCropBlock extends CropBlock {
     }
 
     private float getGrowthChance(int growth) {
-        // Növekedési esély minden growth szintnél 0.8%-kal gyorsabb
         return Math.min(1.0f, 0.01f + 0.008f * growth);
     }
 

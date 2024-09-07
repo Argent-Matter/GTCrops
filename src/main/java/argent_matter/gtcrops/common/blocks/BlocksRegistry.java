@@ -7,9 +7,10 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class BlocksRegistry {
+    // default state
     public static final DeferredRegister<Block> CROP_BLOCK = DeferredRegister.create(ForgeRegistries.BLOCKS, "gtcrops");
 
-    // GTCrops cropok
+    // tier 1 cropok
     public static final RegistryObject<Block> WHEAT_CROP = CROP_BLOCK.register("wheat",
             () -> new GTCropBlock(CropType.WHEAT, BlockBehaviour.Properties.of().noCollission().instabreak()));
 
@@ -22,10 +23,11 @@ public class BlocksRegistry {
     public static final RegistryObject<Block> BEETROOT_CROP = CROP_BLOCK.register("beetroot",
             () -> new GTCropBlock(CropType.BEETROOT, BlockBehaviour.Properties.of().noCollission().instabreak()));
 
-    // Tier 2 és 4-es cropok
+    // tier 2
     public static final RegistryObject<Block> CANE_CROP = CROP_BLOCK.register("cane",
             () -> new GTCropBlock(CropType.CANE, BlockBehaviour.Properties.of().noCollission().instabreak()));
 
+    // tier 4
     public static final RegistryObject<Block> GOO_CANE_CROP = CROP_BLOCK.register("goo_cane",
             () -> new GTCropBlock(CropType.GOO_CANE, BlockBehaviour.Properties.of().noCollission().instabreak()));
 

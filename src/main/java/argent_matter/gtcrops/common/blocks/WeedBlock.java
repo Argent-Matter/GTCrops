@@ -35,7 +35,7 @@ public class WeedBlock extends Block {
         }
     }
 
-    // Parazita hatásokat kiterjeszti a környező növényekre
+    // Sigma SKibidi Toilet fertőzés
     private void spreadInfestation(Level world, BlockPos pos) {
         for (BlockPos nearbyPos : BlockPos.betweenClosed(pos.offset(-1, 0, -1), pos.offset(1, 0, 1))) {
             BlockState nearbyState = world.getBlockState(nearbyPos);

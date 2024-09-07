@@ -13,7 +13,7 @@ public enum CropType {
     GOO_CANE("goo_cane",4);
 
     private final String name;
-    private final int tier;  // Crop Tier
+    private final int tier;
 
     CropType(String name, int tier) {
         this.name = name;
