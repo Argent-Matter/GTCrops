@@ -133,15 +133,15 @@ dependencies {
     processResources {
     // set up properties for filling into metadata
     var properties = [
-            "mod_license": mod_license,
-            "mod_id": mod_id,
-            "version": version,
-            "mod_name": mod_name,
-            "mod_url": mod_url,
-            "mod_author": mod_author,
-            "forge_version": forge_version.split("\\.")[0], // only specify major version of forge
+            "mod_license"      : mod_license,
+            "mod_id"           : mod_id,
+            "version"          : version,
+            "mod_name"         : mod_name,
+            "mod_url"          : mod_url,
+            "mod_authors"      : mod_authors,
+            "forge_version"    : forge_version.split("\\.")[0], // only specify major version of forge
             "minecraft_version": minecraft_version,
-            "gtceu_version": gtceu_version,
+            "gtceu_version"    : gtceu_version,
     ]
     inputs.properties(properties)
 
@@ -171,11 +171,11 @@ jar {
     manifest {
         attributes([
                 "Specification-Title"     : mod_id,
-                "Specification-Vendor"    : mod_author,
+                "Specification-Vendor"    : mod_authors,
                 "Specification-Version"   : "1",
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : version,
-                "Implementation-Vendor"   : mod_author,
+                "Implementation-Vendor"   : mod_authors,
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

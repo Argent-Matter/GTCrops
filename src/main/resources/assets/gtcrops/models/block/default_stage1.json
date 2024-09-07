@@ -1,0 +1,6 @@
+{
+  "parent": "gtcrops:block/crop",
+  "textures": {
+    "crop": "gtcrops:block/default_stage1"
+  }
+}

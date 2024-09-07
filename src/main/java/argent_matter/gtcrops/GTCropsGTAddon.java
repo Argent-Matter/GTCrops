@@ -1,21 +1,17 @@
 package argent_matter.gtcrops;
 
-import argent_matter.gtcrops.registry.GTCropsRegistries;
+import argent_matter.gtcrops.api.registry.GTCropsRegistries;
 import com.gregtechceu.gtceu.api.addon.GTAddon;
 import com.gregtechceu.gtceu.api.addon.IGTAddon;
 import com.gregtechceu.gtceu.api.addon.events.MaterialCasingCollectionEvent;
-import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.material.MapColor;
 
 import java.util.function.Consumer;
 
 @GTAddon
 public class GTCropsGTAddon implements IGTAddon {
+
     @Override
     public GTRegistrate getRegistrate() {
         return GTCropsRegistries.REGISTRATE;

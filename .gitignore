@@ -32,3 +32,4 @@ bin/
 
 run/
 src/generated/.cache/
+src/generated/resources/.cache/

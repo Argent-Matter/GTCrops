@@ -1,0 +1,16 @@
+{
+  "block.gtcrops.crop": "doɹƆ %s",
+  "block.gtcrops.weeds": "spǝǝM",
+  "crop.gtcrops.beetroot": "ʇooɹʇǝǝᗺ",
+  "crop.gtcrops.carrot": "ʇoɹɹɐƆ",
+  "crop.gtcrops.goo_cane": "ǝuɐƆ oo⅁",
+  "crop.gtcrops.iron": "uoɹI",
+  "crop.gtcrops.potato": "oʇɐʇoԀ",
+  "crop.gtcrops.sugar_cane": "ǝuɐƆ ɹɐbnS",
+  "crop.gtcrops.wheat": "ʇɐǝɥM",
+  "item.gtcrops.crop_seeds": "spǝǝS %s",
+  "itemGroup.gtcrops.gt_crops": "sdoɹƆ ɥɔǝ⟘bǝɹ⅁",
+  "tooltip.gtcrops.gain": "%s :uıɐ⅁",
+  "tooltip.gtcrops.growth": "%s :ɥʇʍoɹ⅁",
+  "tooltip.gtcrops.tier": "%s :ɹǝı⟘"
+}

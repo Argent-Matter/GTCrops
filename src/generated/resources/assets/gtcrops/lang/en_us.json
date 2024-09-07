@@ -1,0 +1,16 @@
+{
+  "block.gtcrops.crop": "%s Crop",
+  "block.gtcrops.weeds": "Weeds",
+  "crop.gtcrops.beetroot": "Beetroot",
+  "crop.gtcrops.carrot": "Carrot",
+  "crop.gtcrops.goo_cane": "Goo Cane",
+  "crop.gtcrops.iron": "Iron",
+  "crop.gtcrops.potato": "Potato",
+  "crop.gtcrops.sugar_cane": "Sugar Cane",
+  "crop.gtcrops.wheat": "Wheat",
+  "item.gtcrops.crop_seeds": "%s Seeds",
+  "itemGroup.gtcrops.gt_crops": "GregTech Crops",
+  "tooltip.gtcrops.gain": "Gain: %s",
+  "tooltip.gtcrops.growth": "Growth: %s",
+  "tooltip.gtcrops.tier": "Tier: %s"
+}
