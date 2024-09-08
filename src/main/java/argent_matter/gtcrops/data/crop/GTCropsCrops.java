@@ -29,14 +29,14 @@ public class GTCropsCrops {
     static {
         GTCropsRegistries.CROP_TYPES.unfreeze();
     }
-    
+
     public static final CropType WHEAT = register("wheat", 0xcdb159, 1, () -> Items.WHEAT);
     public static final CropType CARROT = register("carrot", 0xe38a1d, 1, () -> Items.CARROT);
     public static final CropType POTATO = register("potato", 0xc8a24b, 1, () -> Items.POTATO);
     public static final CropType BEETROOT = register("beetroot", 0xbf2529, 1, () -> Items.BEETROOT);
     public static final CropType IRON = register("iron", 0xdcdcdc, 2, () -> Items.IRON_INGOT);
     public static final CropType CANE = register("sugar_cane", "sugar_cane", 2, () -> Items.SUGAR_CANE);
-    public static final CropType RABBITBUSH = register("rabbitbush", "rabbitbush", 4, () -> GTItems.STICKY_RESIN);
+    public static final CropType RABBITBUSH = register("rabbitbush", "rabbitbush", 4, () -> com.gregtechceu.gtceu.common.data.GTItems.STICKY_RESIN);
 
     private static CropType register(String id, int color, int tier, Supplier<ItemLike> drop) {
         return register(GTCrops.id(id), null, color, tier, 1, 1,
@@ -46,7 +46,7 @@ public class GTCropsCrops {
                         .when(new LootItemBlockStatePropertyCondition.Builder(block)
                                 .setProperties(StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(GTCropBlock.AGE, GTCropBlock.MAX_AGE)))),
-                GTCropBlock::new);
+                (cropType, properties) -> new GTCropBlock(cropType, BlockBehaviour.Properties.of().instabreak().noCollission()));
     }
 
     private static CropType register(String id, String baseModelPath, int tier, Supplier<ItemLike> drop) {
@@ -57,7 +57,7 @@ public class GTCropsCrops {
                         .when(new LootItemBlockStatePropertyCondition.Builder(block)
                                 .setProperties(StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(GTCropBlock.AGE, GTCropBlock.MAX_AGE)))),
-                GTCropBlock::new);
+                (cropType, properties) -> new GTCropBlock(cropType, BlockBehaviour.Properties.of().instabreak().noCollission()));
     }
 
     public static CropType register(ResourceLocation id, @Nullable ResourceLocation baseModelPath, int tintColor,
