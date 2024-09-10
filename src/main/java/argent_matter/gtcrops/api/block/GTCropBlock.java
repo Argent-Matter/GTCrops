@@ -60,24 +60,6 @@ public class GTCropBlock extends Block {
         return new GTCropBlockEntity(pos, state);
     }
 
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return (lvl, pos, blockState, t) -> {
-            if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
-                GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
-            }
-        };
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE, GROWTH, GAIN);
-    }
-
-    @Override
-    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context) {
-        return SHAPES_BY_AGE[state.getValue(AGE)];
-    }
-
     @Override
     public boolean isRandomlyTicking(BlockState state) {
         return true;
@@ -100,6 +82,16 @@ public class GTCropBlock extends Block {
         return soil.is(Blocks.FARMLAND);
     }
 
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context) {
+        return SHAPES_BY_AGE[state.getValue(AGE)];
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(AGE, GROWTH, GAIN);
+    }
+
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -110,5 +102,13 @@ public class GTCropBlock extends Block {
     @Override
     public SoundType getSoundType(BlockState state) {
         return SoundType.CROP;
+    }
+
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        return (lvl, pos, blockState, t) -> {
+            if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
+                GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
+            }
+        };
     }
 }
