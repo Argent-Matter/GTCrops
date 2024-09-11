@@ -1,5 +1,4 @@
 package argent_matter.gtcrops.data.datagen.loot;
-
 import argent_matter.gtcrops.api.block.GTCropBlock;
 import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;

@@ -36,7 +36,7 @@ public class GTCropsCrops {
     public static final CropType BEETROOT = register("beetroot", 0xbf2529, 1, () -> Items.BEETROOT);
     public static final CropType IRON = register("iron", 0xdcdcdc, 2, () -> Items.IRON_INGOT);
     public static final CropType CANE = register("sugar_cane", "sugar_cane", 2, () -> Items.SUGAR_CANE);
-    public static final CropType RABBITBUSH = register("rabbitbush", "rabbitbush", 4, () -> com.gregtechceu.gtceu.common.data.GTItems.STICKY_RESIN);
+    public static final CropType RABBITBUSH = register("rabbitbush", "rabbitbush", 4, () -> GTItems.STICKY_RESIN);
 
     private static CropType register(String id, int color, int tier, Supplier<ItemLike> drop) {
         return register(GTCrops.id(id), null, color, tier, 1, 1,

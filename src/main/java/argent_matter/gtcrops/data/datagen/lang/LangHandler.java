@@ -13,8 +13,8 @@ public class LangHandler extends com.gregtechceu.gtceu.data.lang.LangHandler {
         for (CropType type : GTCropsRegistries.CROP_TYPES) {
             provider.add(type.id().toLanguageKey("crop"), toEnglishName(type.id().getPath()));
         }
-        provider.add("block.gtcrops.crop", "%s Crop");
-        provider.add("item.gtcrops.crop_seeds", "%s Seeds");
+        provider.add("block.gtcrops.crop", "%s");
+        provider.add("item.gtcrops.crop_seeds", "Seed Bag (%s)");
 
         // tooltips
         provider.add("tooltip.gtcrops.growth", "Growth: %s");

@@ -10,6 +10,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -21,7 +22,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class GTCropBlock extends Block {
+public class GTCropBlock extends Block implements EntityBlock {
 
     public static final IntegerProperty AGE = IntegerProperty.create("age", 0, 7);
     public static final int MAX_AGE = 7;
@@ -56,8 +57,32 @@ public class GTCropBlock extends Block {
     }
 
     @Nullable
+    @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new GTCropBlockEntity(pos, state);
+    }
+
+    @Nullable
+    @Override
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
+        if (!level.isClientSide) {
+            return (lvl, pos, blockState, t) -> {
+                if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
+                    GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
+                }
+            };
+        }
+        return null;
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(AGE, GROWTH, GAIN);
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context) {
+        return SHAPES_BY_AGE[state.getValue(AGE)];
     }
 
     @Override
@@ -82,16 +107,6 @@ public class GTCropBlock extends Block {
         return soil.is(Blocks.FARMLAND);
     }
 
-    @Override
-    public VoxelShape getShape(BlockState state, BlockGetter getter, BlockPos pos, CollisionContext context) {
-        return SHAPES_BY_AGE[state.getValue(AGE)];
-    }
-
-    @Override
-    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(AGE, GROWTH, GAIN);
-    }
-
     @Nullable
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
@@ -102,13 +117,5 @@ public class GTCropBlock extends Block {
     @Override
     public SoundType getSoundType(BlockState state) {
         return SoundType.CROP;
-    }
-
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        return (lvl, pos, blockState, t) -> {
-            if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
-                GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
-            }
-        };
     }
 }
