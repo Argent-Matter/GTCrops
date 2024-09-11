@@ -1,9 +1,8 @@
 package argent_matter.gtcrops;
 
-import argent_matter.gtcrops.api.block.GTCropBlock;
-import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.api.registry.GTCropsRegistries;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;
+import argent_matter.gtcrops.data.blockentity.GTCropsBlockEntities;
 import argent_matter.gtcrops.data.crop.GTCropsCrops;
 import argent_matter.gtcrops.data.datagen.GTCropsDatagen;
 import com.gregtechceu.gtceu.api.GTCEuAPI;
@@ -15,7 +14,6 @@ import com.gregtechceu.gtceu.api.data.chemical.material.registry.MaterialRegistr
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType;
 import com.gregtechceu.gtceu.api.recipe.RecipeCondition;
-import com.gregtechceu.gtceu.common.registry.GTRegistration;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -24,10 +22,6 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.function.Supplier;
 
 @Mod(GTCrops.MOD_ID)
 public class GTCrops {
@@ -53,6 +47,7 @@ public class GTCrops {
     public static void init() {
         GTCropsCrops.init();
         GTCropsBlocks.init();
+        GTCropsBlockEntities.init();
 
         // fabric exclusive, squeeze this in here to register before stuff is used
         GTCropsRegistries.REGISTRATE.registerRegistrate();

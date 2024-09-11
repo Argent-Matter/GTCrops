@@ -46,7 +46,7 @@ public class GTCropsCrops {
                         .when(new LootItemBlockStatePropertyCondition.Builder(block)
                                 .setProperties(StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(GTCropBlock.AGE, GTCropBlock.MAX_AGE)))),
-                (cropType, properties) -> new GTCropBlock(cropType, BlockBehaviour.Properties.of().instabreak().noCollission()));
+                GTCropBlock::new);
     }
 
     private static CropType register(String id, String baseModelPath, int tier, Supplier<ItemLike> drop) {
@@ -57,7 +57,7 @@ public class GTCropsCrops {
                         .when(new LootItemBlockStatePropertyCondition.Builder(block)
                                 .setProperties(StatePropertiesPredicate.Builder.properties()
                                         .hasProperty(GTCropBlock.AGE, GTCropBlock.MAX_AGE)))),
-                (cropType, properties) -> new GTCropBlock(cropType, BlockBehaviour.Properties.of().instabreak().noCollission()));
+                GTCropBlock::new);
     }
 
     public static CropType register(ResourceLocation id, @Nullable ResourceLocation baseModelPath, int tintColor,

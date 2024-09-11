@@ -3,6 +3,7 @@ package argent_matter.gtcrops.api.crop;
 import argent_matter.gtcrops.api.block.GTCropBlock;
 import lombok.Getter;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -19,7 +20,7 @@ public record CropType(ResourceLocation id, @Nullable ResourceLocation baseModel
                        int defaultGrowth, int defaultGain, BiConsumer<GTCropBlock, LootTable.Builder> loot,
                        BiFunction<CropType, BlockBehaviour.Properties, ? extends GTCropBlock> createFunction) {
 
-    public Component getName() {
+    public MutableComponent getName() {
         return Component.translatable(getNameId());
     }
 

@@ -11,12 +11,12 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GTCropBlockEntity extends BlockEntity {
 
@@ -30,14 +30,20 @@ public class GTCropBlockEntity extends BlockEntity {
     private static final int MAX_GAIN = 31;
 
     private static final BlockPos[] OFFSETS = {
-            new BlockPos(1, 0, 0), new BlockPos(-1, 0, 0),
-            new BlockPos(0, 0, 1), new BlockPos(0, 0, -1),
-            new BlockPos(1, 0, 1), new BlockPos(-1, 0, -1),
-            new BlockPos(1, 0, -1), new BlockPos(-1, 0, 1)
+            // Cardinal directions
+            new BlockPos(1, 0, 0),
+            new BlockPos(-1, 0, 0),
+            new BlockPos(0, 0, 1),
+            new BlockPos(0, 0, -1),
+            // inter-cardinal directions
+            new BlockPos(1, 0, 1),
+            new BlockPos(-1, 0, -1),
+            new BlockPos(1, 0, -1),
+            new BlockPos(-1, 0, 1)
     };
 
-    public GTCropBlockEntity(BlockPos pos, BlockState state) {
-        super(CropBlockEntity.GT_CROP_BLOCK_ENTITY.get(), pos, state);
+    public GTCropBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
         this.growth = 1;
         this.gain = 1;
     }
@@ -126,7 +132,7 @@ public class GTCropBlockEntity extends BlockEntity {
         if (canCrossbreedWith(neighborCrop)) {
             if (state.getBlock() instanceof GTCropBlock cropBlock) {
                 if (cropBlock.getCropType().equals(neighborCrop.getCropType())) {
-                    createCropWithBetterStats(level, airPos, cropBlock, state);
+                    createCropWithBetterStats(level, airPos);
                 } else {
                     createNewCrop(level, airPos, cropBlock, neighborCrop);
                 }
@@ -156,22 +162,16 @@ public class GTCropBlockEntity extends BlockEntity {
         return null;
     }
 
-    private void createCropWithBetterStats(Level world, BlockPos airPos, GTCropBlock cropBlock, BlockState current) {
-        BlockState currentState = world.getBlockState(airPos);
+    private void createCropWithBetterStats(Level level, BlockPos airPos) {
+        BlockState currentState = level.getBlockState(airPos);
         if (!currentState.isAir()) {
             return;
         }
 
-        Random random = new Random();
-        int currentGrowth = current.getValue(GTCropBlock.GROWTH);
-        int currentGain = current.getValue(GTCropBlock.GAIN);
-
-        if (random.nextBoolean()) {
-            int newGrowth = Math.min(currentGrowth + 1, MAX_GROWTH);
-            world.setBlock(airPos, current.setValue(GTCropBlock.GROWTH, newGrowth), 3);
+        if (this.level.random.nextBoolean()) {
+            this.growth = Math.min(this.growth + 1, MAX_GROWTH);
         } else {
-            int newGain = Math.min(currentGain + 1, MAX_GAIN);
-            world.setBlock(airPos, current.setValue(GTCropBlock.GAIN, newGain), 3);
+            this.gain = Math.min(this.gain + 1, MAX_GAIN);
         }
     }
 
@@ -186,17 +186,16 @@ public class GTCropBlockEntity extends BlockEntity {
             return;
         }
 
-        Random random = new Random();
         GTCropBlock newCrop;
         int parentTier = Math.max(crop1.getCropType().tier(), crop2.getCropType().tier());
 
-        if (random.nextFloat() < 0.5) {
+        if (level.random.nextFloat() < 0.5) {
             newCrop = getRandomNewCrop(parentTier);
         } else {
-            newCrop = random.nextBoolean() ? crop1 : crop2;
+            newCrop = level.random.nextBoolean() ? crop1 : crop2;
         }
 
-        world.setBlock(airPos, newCrop.defaultBlockState().setValue(GTCropBlock.GROWTH, 1).setValue(GTCropBlock.GAIN, 1), 3);
+        world.setBlock(airPos, newCrop.defaultBlockState(), 3);
     }
 
     private GTCropBlock getRandomNewCrop(int parentTier) {
@@ -204,12 +203,11 @@ public class GTCropBlockEntity extends BlockEntity {
 
         for (CropType cropType : GTCropsRegistries.CROP_TYPES.values()) {
             if (cropType.tier() <= parentTier) {
-                availableCropBlocks.add((GTCropBlock) GTCropsBlocks.CROP_BLOCKS.get(cropType).get());
+                availableCropBlocks.add(GTCropsBlocks.CROP_BLOCKS.get(cropType).get());
             }
         }
 
-        Random random = new Random();
-        return availableCropBlocks.get(random.nextInt(availableCropBlocks.size()));
+        return availableCropBlocks.get(level.random.nextInt(availableCropBlocks.size()));
     }
 
     private boolean canCrossbreedWith(GTCropBlock neighborCrop) {
@@ -221,9 +219,6 @@ public class GTCropBlockEntity extends BlockEntity {
             return true;
         }
 
-        if (thisTier == 1 && neighborTier <= 2 || thisTier == 2 && neighborTier == 1) {
-            return true;
-        }
-        return false;
+        return thisTier == 1 && neighborTier <= 2 || thisTier == 2 && neighborTier == 1;
     }
 }

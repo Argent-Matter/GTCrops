@@ -1,4 +1,5 @@
 package argent_matter.gtcrops.data.datagen.loot;
+
 import argent_matter.gtcrops.api.block.GTCropBlock;
 import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.SetItemCountFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
+import net.minecraftforge.data.loading.DatagenModLoader;
 
 import java.util.Map;
 import java.util.function.Supplier;
@@ -19,6 +21,10 @@ import java.util.function.Supplier;
 public class GTCropsLoot {
 
     public static void addLoot(final Map<ResourceLocation, LootTable> lootTables, VanillaBlockLoot loot) {
+        if (DatagenModLoader.isRunningDataGen()) {
+            return;
+        }
+
         for (Supplier<GTCropBlock> supplier : GTCropsBlocks.CROP_BLOCKS.values()) {
             GTCropBlock block = supplier.get();
             CropType type = block.getCropType();

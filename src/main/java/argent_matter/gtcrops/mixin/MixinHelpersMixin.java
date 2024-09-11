@@ -1,4 +1,5 @@
 package argent_matter.gtcrops.mixin;
+
 import argent_matter.gtcrops.data.datagen.loot.GTCropsLoot;
 import com.gregtechceu.gtceu.core.MixinHelpers;
 import net.minecraft.data.loot.packs.VanillaBlockLoot;

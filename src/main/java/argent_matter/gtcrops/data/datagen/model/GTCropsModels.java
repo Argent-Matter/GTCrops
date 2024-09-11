@@ -33,14 +33,14 @@ public class GTCropsModels {
             Int2ObjectMap<ResourceLocation> ageToModel = new Int2ObjectOpenHashMap<>();
             PropertyDispatch propertyDispatch;
             if (baseModelPath != null) {
-                propertyDispatch = PropertyDispatch.properties(GTCropBlock.AGE, GTCropBlock.GAIN, GTCropBlock.GROWTH).generate((age, gain, growth) -> {
+                propertyDispatch = PropertyDispatch.property(GTCropBlock.AGE).generate((age) -> {
                     ResourceLocation modelLocation = ageToModel.computeIfAbsent(age, (agex) -> {
                         return baseModelPath.withSuffix("_stage" + agex);
                     });
                     return Variant.variant().with(VariantProperties.MODEL, modelLocation);
                 });
             } else {
-                propertyDispatch = PropertyDispatch.properties(GTCropBlock.AGE, GTCropBlock.GAIN, GTCropBlock.GROWTH).generate((age, gain, growth) -> {
+                propertyDispatch = PropertyDispatch.property(GTCropBlock.AGE).generate((age) -> {
                     ResourceLocation modelLocation = ageToModel.computeIfAbsent(age, (agex) -> {
                         return createSuffixedVariant(block, "_stage" + agex, TextureMapping::crop);
                     });
