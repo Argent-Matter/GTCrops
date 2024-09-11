@@ -2,7 +2,6 @@ package argent_matter.gtcrops;
 
 import argent_matter.gtcrops.api.block.GTCropBlock;
 import argent_matter.gtcrops.api.crop.CropType;
-import argent_matter.gtcrops.api.entity.CropBlockEntity;
 import argent_matter.gtcrops.api.registry.GTCropsRegistries;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;
 import argent_matter.gtcrops.data.crop.GTCropsCrops;
@@ -42,7 +41,6 @@ public class GTCrops {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
         GTCrops.init();
-        CropBlockEntity.BLOCK_ENTITIES.register(modBus);
 
         var bus = FMLJavaModLoadingContext.get().getModEventBus();
         bus.register(this);
