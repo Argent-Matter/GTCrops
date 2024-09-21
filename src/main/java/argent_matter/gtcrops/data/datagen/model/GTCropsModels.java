@@ -27,9 +27,9 @@ public class GTCropsModels {
     public static void generateCropModels() {
         for (CropType type : GTCropsRegistries.CROP_TYPES) {
             GTCropBlock block = GTCropsBlocks.CROP_BLOCKS.get(type).get();
-            ResourceLocation blockId = type.id().withSuffix("_crop");
+            ResourceLocation blockId = type.getId().withSuffix("_crop"); // Use getId()
 
-            final ResourceLocation baseModelPath = type.baseModelPath();
+            final ResourceLocation baseModelPath = type.getBaseModelPath(); // Use getBaseModelPath()
             Int2ObjectMap<ResourceLocation> ageToModel = new Int2ObjectOpenHashMap<>();
             PropertyDispatch propertyDispatch;
             if (baseModelPath != null) {
