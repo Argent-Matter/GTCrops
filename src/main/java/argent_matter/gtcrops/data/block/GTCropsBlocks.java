@@ -35,13 +35,12 @@ public class GTCropsBlocks {
     private static void createCrops() {
         var cropBlocksBuilder = new ImmutableMap.Builder<CropType, BlockEntry<GTCropBlock>>();
         for (CropType type : GTCropsRegistries.CROP_TYPES) {
-            ResourceLocation id = type.getId();
+            ResourceLocation id = type.id();
             IGTAddon addon = AddonFinder.getAddon(id.getNamespace());
             if (addon == null) {
                 continue;
             }
-            BlockEntry<GTCropBlock> block = addon.getRegistrate().block(id.getPath() + "_crop",
-                            p -> (GTCropBlock) type.getCreateFunction().apply(type, p))
+            BlockEntry<GTCropBlock> block = addon.getRegistrate().block(id.getPath() + "_crop", p -> (GTCropBlock) type.createFunction().apply(type, p))
                     .properties(p -> p.noCollission()
                             .instabreak()
                             .mapColor(MapColor.PLANT)
@@ -53,7 +52,7 @@ public class GTCropsBlocks {
                     .setData(ProviderType.BLOCKSTATE, NonNullBiConsumer.noop())
                     .setData(ProviderType.LOOT, NonNullBiConsumer.noop())
                     .addLayer(() -> RenderType::cutoutMipped)
-                    .color(() -> () -> (state, level, pos, index) -> type.getTintColor())
+                    .color(() -> () -> (state, level, pos, index) -> type.tintColor())
                     .item((b, p) -> new CropSeedItem(b, type, p))
                     .setData(ProviderType.ITEM_MODEL, NonNullBiConsumer.noop())
                     .build()
