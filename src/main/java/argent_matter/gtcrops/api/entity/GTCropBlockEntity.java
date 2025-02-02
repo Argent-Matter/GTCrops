@@ -4,221 +4,276 @@ import argent_matter.gtcrops.api.block.GTCropBlock;
 import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.api.registry.GTCropsRegistries;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;
+import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GTCropBlockEntity extends BlockEntity {
 
+    @Getter
     private int growth;
+    @Getter
     private int gain;
+    @Getter
+    private int resistance;
+
     private int crossbreedingCooldown = 0;
+
     private static final int CROSSBREEDING_COOLDOWN_TICKS = 1200;
     private static final int MAX_AGE = 7;
     private static final int MIN_CROSSBREED_AGE = 3;
-    private static final int MAX_GROWTH = 24;
-    private static final int MAX_GAIN = 31;
-
-    private static final BlockPos[] OFFSETS = {
-            // Cardinal directions
-            new BlockPos(1, 0, 0),
-            new BlockPos(-1, 0, 0),
-            new BlockPos(0, 0, 1),
-            new BlockPos(0, 0, -1),
-            // inter-cardinal directions
-            new BlockPos(1, 0, 1),
-            new BlockPos(-1, 0, -1),
-            new BlockPos(1, 0, -1),
-            new BlockPos(-1, 0, 1)
-    };
 
     public GTCropBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         this.growth = 1;
         this.gain = 1;
+        this.resistance = 1;
     }
 
-    @Override
-    public void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.putInt("Growth", this.growth);
-        tag.putInt("Gain", this.gain);
-        tag.putInt("CrossbreedingCooldown", this.crossbreedingCooldown);
-    }
+    public static void tick(Level level, BlockPos pos, BlockState state, GTCropBlockEntity blockEntity) {
+        if (level.isClientSide) return;
 
-    @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        this.growth = tag.getInt("Growth");
-        this.gain = tag.getInt("Gain");
-        this.crossbreedingCooldown = tag.getInt("CrossbreedingCooldown");
-    }
-
-    public static void tick(ServerLevel level, BlockPos pos, BlockState state, GTCropBlockEntity blockEntity) {
-        RandomSource random = level.getRandom();
-        int age = state.getValue(GTCropBlock.AGE);
-
-        if (age < MAX_AGE) {
-            float growthChance = blockEntity.getGrowthChance();
-
-            if (random.nextFloat() <= growthChance) {
-                level.setBlock(pos, state.setValue(GTCropBlock.AGE, age + 1), 3);
-            }
-        }
-
-        blockEntity.handleWeeds(level, pos, random);
+        blockEntity.handleGrowth(level, pos, state);
 
         if (blockEntity.crossbreedingCooldown <= 0) {
-            blockEntity.attemptCrossbreeding(level, pos, state);
+            blockEntity.handleCrossbreeding((ServerLevel) level, pos, state);
             blockEntity.crossbreedingCooldown = CROSSBREEDING_COOLDOWN_TICKS;
         } else {
             blockEntity.crossbreedingCooldown--;
         }
     }
 
-    private void handleWeeds(ServerLevel level, BlockPos pos, RandomSource random) {
-        if (this.growth >= 22) {
-            float weedChance = getWeedChance();
-            if (random.nextFloat() <= weedChance) {
-                convertToWeed(level, pos);
-            }
+    private void handleGrowth(Level level, BlockPos pos, BlockState state) {
+        if (level instanceof ServerLevel serverLevel) {
+            RandomSource random = serverLevel.getRandom();
+            handleRandomTick(state, serverLevel, pos, random);
         }
     }
 
-    private void convertToWeed(ServerLevel level, BlockPos pos) {
-        level.setBlock(pos, Blocks.DEAD_BUSH.defaultBlockState(), 3);
+    public void handleRandomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (!canSurvive(level, pos)) {
+            attemptWeedConversion(level, pos);
+            return;
+        }
+
+        if (random.nextFloat() <= getGrowthChance()) {
+            incrementAge(state, level, pos);
+        }
     }
 
-    private float getWeedChance() {
-        return Math.min(1.0f, 0.02f * this.growth);
+    private boolean canSurvive(Level level, BlockPos pos) {
+        return level.getBlockState(pos.below()).is(Blocks.FARMLAND);
     }
 
     private float getGrowthChance() {
-        return Math.min(1.0f, 0.01f + 0.008f * this.growth);
+        return 0.02f + 0.01f * this.growth;
     }
 
-    private void attemptCrossbreeding(ServerLevel level, BlockPos pos, BlockState state) {
-        if (state.getValue(GTCropBlock.AGE) < MIN_CROSSBREED_AGE) {
-            return;
+    private void incrementAge(BlockState state, Level level, BlockPos pos) {
+        int currentAge = state.getValue(GTCropBlock.AGE);
+        if (currentAge < MAX_AGE) {
+            level.setBlock(pos, state.setValue(GTCropBlock.AGE, currentAge + 1), 3);
+        } else {
+            checkForWeeds(level, pos);
+        }
+    }
+
+    private void checkForWeeds(Level level, BlockPos pos) {
+        if (growth >= 22) {
+            RandomSource random = level.getRandom();
+            float weedChance = getWeedChance();
+            if (random.nextFloat() < weedChance) {
+                level.setBlock(pos, GTCropsBlocks.WEEDS.get().defaultBlockState(), 3);
+            }
+        }
+    }
+
+    private float getWeedChance() {
+        float baseChance = switch (growth) {
+            case 22 -> 0.25f;
+            case 23 -> 0.50f;
+            case 24 -> 0.75f;
+            default -> 0.0f;
+        };
+        return Math.max(0, baseChance - (resistance * 0.03f));
+    }
+
+    private void attemptWeedConversion(Level level, BlockPos pos) {
+        if (level.getRandom().nextFloat() < 0.2f) {
+            level.setBlock(pos, GTCropsBlocks.WEEDS.get().defaultBlockState(), 3);
+        } else {
+            level.destroyBlock(pos, true);
+        }
+    }
+
+    private void handleCrossbreeding(ServerLevel level, BlockPos pos, BlockState state) {
+        int age = state.getValue(GTCropBlock.AGE);
+        if (age < MIN_CROSSBREED_AGE) return;
+
+        RandomSource random = level.getRandom();
+        boolean bred = false;
+
+        int[][] inlineOffsets = {
+                {2, 0}, {-2, 0}, {0, 2}, {0, -2}
+        };
+        for (int[] off : inlineOffsets) {
+            int dx = off[0], dz = off[1];
+            BlockPos emptyPos = pos.offset(dx / 2, 0, dz / 2);
+            if (!level.isEmptyBlock(emptyPos)) continue;
+            BlockPos partnerPos = pos.offset(dx, 0, dz);
+            BlockState partnerState = level.getBlockState(partnerPos);
+            Block partnerBlock = partnerState.getBlock();
+            if (!(partnerBlock instanceof GTCropBlock)) continue;
+            BlockEntity partnerBE = level.getBlockEntity(partnerPos);
+            if (!(partnerBE instanceof GTCropBlockEntity partnerCrop)) continue;
+            int partnerAge = partnerState.getValue(GTCropBlock.AGE);
+            if (partnerAge < MIN_CROSSBREED_AGE) continue;
+
+            bred = true;
+            breedWithPartner(random, level, emptyPos, this, partnerCrop);
+            break;
         }
 
-        Pair<BlockPos, GTCropBlock> neighbor = findNeighboringCropPos(level, pos);
-        if (neighbor == null) {
-            return;
+        if (!bred) {
+            int[][] diagonalOffsets = {
+                    {1, 1}, {1, -1}, {-1, 1}, {-1, -1}
+            };
+            for (int[] off : diagonalOffsets) {
+                int dx = off[0], dz = off[1];
+                BlockPos partnerPos = pos.offset(dx, 0, dz);
+                BlockState partnerState = level.getBlockState(partnerPos);
+                Block partnerBlock = partnerState.getBlock();
+                if (!(partnerBlock instanceof GTCropBlock)) continue;
+                BlockEntity partnerBE = level.getBlockEntity(partnerPos);
+                if (!(partnerBE instanceof GTCropBlockEntity partnerCrop)) continue;
+                int partnerAge = partnerState.getValue(GTCropBlock.AGE);
+                if (partnerAge < MIN_CROSSBREED_AGE) continue;
+
+                BlockPos pos2 = pos.offset(dx, 0, 0);
+                BlockPos pos3 = pos.offset(0, 0, dz);
+                List<BlockPos> candidates = new ArrayList<>();
+                if (level.isEmptyBlock(pos2)) {
+                    candidates.add(pos2);
+                }
+                if (level.isEmptyBlock(pos3)) {
+                    candidates.add(pos3);
+                }
+                if (candidates.isEmpty()) continue;
+
+                BlockPos emptyPos = candidates.get(random.nextInt(candidates.size()));
+                bred = true;
+                breedWithPartner(random, level, emptyPos, this, partnerCrop);
+                break;
+            }
         }
+    }
 
-        GTCropBlock neighborCrop = neighbor.getRight();
-        BlockPos neighborPos = neighbor.getLeft();
+    private void breedWithPartner(RandomSource random, ServerLevel level, BlockPos emptyPos,
+                                  GTCropBlockEntity parent1, GTCropBlockEntity parent2) {
+        CropType type1 = parent1.getCropType();
+        CropType type2 = parent2.getCropType();
 
-        if (level.getBlockState(neighborPos).getValue(GTCropBlock.AGE) < MIN_CROSSBREED_AGE) {
-            return;
-        }
+        CropType offspringType;
+        int offspringGrowth, offspringGain, offspringResistance;
 
-        BlockPos airPos = findAirBlockBetweenCrops(pos, neighborPos);
-        if (airPos == null || !level.getBlockState(airPos).isAir()) {
-            return;
-        }
-
-        if (canCrossbreedWith(neighborCrop)) {
-            if (state.getBlock() instanceof GTCropBlock cropBlock) {
-                if (cropBlock.getCropType().equals(neighborCrop.getCropType())) {
-                    createCropWithBetterStats(level, airPos);
+        if (type1.equals(type2)) {
+            if (random.nextFloat() < 0.10f) {
+                offspringType = getMutationCropType(type1, random);
+                offspringGrowth = parent1.growth;
+                offspringGain = parent1.gain;
+                offspringResistance = parent1.resistance;
+            } else {
+                offspringType = type1;
+                if (random.nextBoolean()) {
+                    offspringGrowth = parent1.growth;
+                    offspringGain = parent1.gain;
+                    offspringResistance = parent1.resistance;
                 } else {
-                    createNewCrop(level, airPos, cropBlock, neighborCrop);
+                    offspringGrowth = parent1.growth;
+                    offspringGain = parent1.gain;
+                    offspringResistance = parent1.resistance;
+                    int statToIncrease = random.nextInt(3);
+                    if (statToIncrease == 0) {
+                        offspringGrowth++;
+                    } else if (statToIncrease == 1) {
+                        offspringGain++;
+                    } else {
+                        offspringResistance++;
+                    }
+                }
+            }
+        } else {
+            offspringType = random.nextBoolean() ? type1 : type2;
+            offspringGrowth = Math.max(parent1.growth, parent2.growth);
+            offspringGain = Math.max(parent1.gain, parent2.gain);
+            offspringResistance = Math.max(parent1.resistance, parent2.resistance);
+            if (random.nextBoolean()) {
+                int statToIncrease = random.nextInt(3);
+                if (statToIncrease == 0) {
+                    offspringGrowth++;
+                } else if (statToIncrease == 1) {
+                    offspringGain++;
+                } else {
+                    offspringResistance++;
                 }
             }
         }
+
+        Block cropBlock = GTCropsBlocks.CROP_BLOCKS.get(offspringType).get();
+        BlockState offspringState = cropBlock.defaultBlockState().setValue(GTCropBlock.AGE, 0);
+        level.setBlock(emptyPos, offspringState, 3);
+
+        BlockEntity offspringBE = level.getBlockEntity(emptyPos);
+        if (offspringBE instanceof GTCropBlockEntity newCrop) {
+            newCrop.growth = offspringGrowth;
+            newCrop.gain = offspringGain;
+            newCrop.resistance = offspringResistance;
+        }
     }
 
-    private Pair<BlockPos, GTCropBlock> findNeighboringCropPos(Level world, BlockPos pos) {
-        for (BlockPos offset : OFFSETS) {
-            BlockPos neighborPos = pos.offset(offset);
-            if (world.getBlockState(neighborPos).getBlock() instanceof GTCropBlock cropBlock) {
-                return Pair.of(neighborPos, cropBlock);
+    private CropType getMutationCropType(CropType parentType, RandomSource random) {
+        List<CropType> candidates = new ArrayList<>();
+        for (CropType type : GTCropsRegistries.CROP_TYPES) {
+            if (!type.equals(parentType) && type.tier() == parentType.tier()) {
+                candidates.add(type);
             }
         }
-        return null;
+        if (candidates.isEmpty()) {
+            return parentType;
+        }
+        return candidates.get(random.nextInt(candidates.size()));
     }
 
-    private BlockPos findAirBlockBetweenCrops(BlockPos pos1, BlockPos pos2) {
-        int midX = (pos1.getX() + pos2.getX()) / 2;
-        int midY = (pos1.getY() + pos2.getY()) / 2;
-        int midZ = (pos1.getZ() + pos2.getZ()) / 2;
-
-        BlockPos midPos = new BlockPos(midX, midY, midZ);
-        if (pos1.distSqr(midPos) == 1 && pos2.distSqr(midPos) == 1) {
-            return midPos;
-        }
-        return null;
+    @Override
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        this.growth = tag.getInt("growth");
+        this.gain = tag.getInt("gain");
+        this.resistance = tag.getInt("resistance");
+        this.crossbreedingCooldown = tag.getInt("crossbreedingCooldown");
     }
 
-    private void createCropWithBetterStats(Level level, BlockPos airPos) {
-        BlockState currentState = level.getBlockState(airPos);
-        if (!currentState.isAir()) {
-            return;
-        }
-
-        if (this.level.random.nextBoolean()) {
-            this.growth = Math.min(this.growth + 1, MAX_GROWTH);
-        } else {
-            this.gain = Math.min(this.gain + 1, MAX_GAIN);
-        }
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putInt("growth", growth);
+        tag.putInt("gain", gain);
+        tag.putInt("resistance", resistance);
+        tag.putInt("crossbreedingCooldown", crossbreedingCooldown);
     }
 
-    private void createNewCrop(Level world, BlockPos airPos, GTCropBlock crop1, GTCropBlock crop2) {
-        BlockState soilState = world.getBlockState(airPos.below());
-        if (!soilState.is(Blocks.FARMLAND)) {
-            return;
-        }
-
-        BlockState currentState = world.getBlockState(airPos);
-        if (!currentState.isAir()) {
-            return;
-        }
-
-        GTCropBlock newCrop;
-        int parentTier = Math.max(crop1.getCropType().tier(), crop2.getCropType().tier());
-
-        if (level.random.nextFloat() < 0.5) {
-            newCrop = getRandomNewCrop(parentTier);
-        } else {
-            newCrop = level.random.nextBoolean() ? crop1 : crop2;
-        }
-
-        world.setBlock(airPos, newCrop.defaultBlockState(), 3);
-    }
-
-    private GTCropBlock getRandomNewCrop(int parentTier) {
-        List<GTCropBlock> availableCropBlocks = new ArrayList<>();
-
-        for (CropType cropType : GTCropsRegistries.CROP_TYPES.values()) {
-            if (cropType.tier() <= parentTier) {
-                availableCropBlocks.add(GTCropsBlocks.CROP_BLOCKS.get(cropType).get());
-            }
-        }
-
-        return availableCropBlocks.get(level.random.nextInt(availableCropBlocks.size()));
-    }
-
-    private boolean canCrossbreedWith(GTCropBlock neighborCrop) {
-        GTCropBlock thisCrop = (GTCropBlock) this.getBlockState().getBlock();
-        int thisTier = thisCrop.getCropType().tier();
-        int neighborTier = neighborCrop.getCropType().tier();
-
-        if (thisTier == neighborTier) {
-            return true;
-        }
-
-        return thisTier == 1 && neighborTier <= 2 || thisTier == 2 && neighborTier == 1;
+    public CropType getCropType() {
+        return ((GTCropBlock) getBlockState().getBlock()).getCropType();
     }
 }

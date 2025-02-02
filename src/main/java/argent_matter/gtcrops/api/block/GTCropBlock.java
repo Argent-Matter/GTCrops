@@ -5,31 +5,50 @@ import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.data.blockentity.GTCropsBlockEntities;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public class GTCropBlock extends CropBlock implements EntityBlock {
+public class GTCropBlock extends Block implements EntityBlock {
 
     public static final int MAX_AGE = 7;
+    public static final IntegerProperty AGE = IntegerProperty.create("age", 0, MAX_AGE);
 
     @Getter
     private final CropType cropType;
 
+    private static final VoxelShape[] AGE_SHAPES = new VoxelShape[]{
+            Block.box(2, 0, 2, 14, 2, 14),
+            Block.box(2, 0, 2, 14, 4, 14),
+            Block.box(2, 0, 2, 14, 6, 14),
+            Block.box(2, 0, 2, 14, 8, 14),
+            Block.box(2, 0, 2, 14, 10, 14),
+            Block.box(2, 0, 2, 14, 12, 14),
+            Block.box(2, 0, 2, 14, 14, 14),
+            Block.box(2, 0, 2, 14, 16, 14)
+    };
+
     public GTCropBlock(CropType cropType, Properties properties) {
         super(properties);
         this.cropType = cropType;
-        this.registerDefaultState(this.stateDefinition.any()
-                .setValue(AGE, 0));
+        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0));
+    }
+
+    @Override
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
+        builder.add(AGE);
     }
 
     @Override
@@ -51,14 +70,11 @@ public class GTCropBlock extends CropBlock implements EntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
-        if (!level.isClientSide) {
-            return (lvl, pos, blockState, t) -> {
-                if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
-                    GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
-                }
-            };
-        }
-        return null;
+        return level.isClientSide ? null : (lvl, pos, blockState, t) -> {
+            if (t instanceof GTCropBlockEntity gtCropBlockEntity && lvl instanceof ServerLevel serverLevel) {
+                GTCropBlockEntity.tick(serverLevel, pos, blockState, gtCropBlockEntity);
+            }
+        };
     }
 
     @Override
@@ -88,5 +104,17 @@ public class GTCropBlock extends CropBlock implements EntityBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockState soil = context.getLevel().getBlockState(context.getClickedPos().below());
         return soil.is(Blocks.FARMLAND) ? this.defaultBlockState() : null;
+    }
+
+    public void incrementAge(Level level, BlockPos pos, BlockState state) {
+        int currentAge = state.getValue(AGE);
+        if (currentAge < MAX_AGE) {
+            level.setBlock(pos, state.setValue(AGE, currentAge + 1), 3);
+        }
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, net.minecraft.world.phys.shapes.CollisionContext context) {
+        return AGE_SHAPES[state.getValue(AGE)];
     }
 }
