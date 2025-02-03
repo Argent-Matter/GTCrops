@@ -6,6 +6,7 @@ import argent_matter.gtcrops.api.crop.CropType;
 import argent_matter.gtcrops.api.registry.GTCropsRegistries;
 import argent_matter.gtcrops.data.block.GTCropsBlocks;
 import com.gregtechceu.gtceu.data.pack.GTDynamicResourcePack;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.data.models.blockstates.MultiVariantGenerator;
@@ -59,7 +60,10 @@ public class GTCropsModels {
     }
 
     private static void createSimpleFlatItemModel(Item flatItem) {
-        ModelTemplates.FLAT_ITEM.create(ModelLocationUtils.getModelLocation(flatItem), TextureMapping.layer0(flatItem), GTDynamicResourcePack::addBlockModel);
-    }
+        ResourceLocation modelLocation = ModelLocationUtils.getModelLocation(flatItem);
 
+        TextureMapping mapping = new TextureMapping().put(TextureSlot.LAYER0, GTCrops.id("item/crop"));
+
+        ModelTemplates.FLAT_ITEM.create(modelLocation, mapping, GTDynamicResourcePack::addBlockModel);
+    }
 }

@@ -35,8 +35,13 @@ public class CropSeedItem extends ItemNameBlockItem {
     public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(stack, level, tooltip, flag);
 
-        tooltip.add(Component.translatable("tooltip.gtcrops.growth", cropType.defaultGrowth()));
-        tooltip.add(Component.translatable("tooltip.gtcrops.gain", cropType.defaultGain()));
+        if (stack.hasTag()) {
+            tooltip.add(Component.translatable("tooltip.gtcrops.growth", stack.getTag().getInt("growth")));
+            tooltip.add(Component.translatable("tooltip.gtcrops.gain", stack.getTag().getInt("gain")));
+            tooltip.add(Component.translatable("tooltip.gtcrops.resistance", stack.getTag().getInt("resistance")));
+        } else {
+            tooltip.add(Component.translatable("tooltip.gtcrops.no_genetic_data"));
+        }
         tooltip.add(Component.translatable("tooltip.gtcrops.tier", cropType.tier()));
     }
 }

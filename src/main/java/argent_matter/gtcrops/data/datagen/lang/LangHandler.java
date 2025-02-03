@@ -20,5 +20,6 @@ public class LangHandler extends com.gregtechceu.gtceu.data.lang.LangHandler {
         provider.add("tooltip.gtcrops.growth", "Growth: %s");
         provider.add("tooltip.gtcrops.gain", "Gain: %s");
         provider.add("tooltip.gtcrops.tier", "Tier: %s");
+        provider.add("tooltip.gtcrops.resistance", "Resistance: %s");
     }
 }

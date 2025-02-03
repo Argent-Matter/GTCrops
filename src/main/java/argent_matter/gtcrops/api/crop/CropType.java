@@ -11,14 +11,24 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * Crop type interface.
- * TODO better API documentation
+ * TODO: better API documentation
  */
-public record CropType(ResourceLocation id, @Nullable ResourceLocation baseModelPath, int tintColor, int tier,
-                       int defaultGrowth, int defaultGain, BiConsumer<GTCropBlock, LootTable.Builder> loot,
-                       BiFunction<CropType, BlockBehaviour.Properties, ? extends GTCropBlock> createFunction) {
+public record CropType(
+        ResourceLocation id,
+        @Nullable ResourceLocation baseModelPath,
+        int tintColor,
+        int tier,
+        int defaultGrowth,
+        int defaultGain,
+        int defaultResistance,
+        Supplier<? extends net.minecraft.world.level.ItemLike> dropSupplier,
+        BiConsumer<GTCropBlock, LootTable.Builder> loot,
+        BiFunction<CropType, BlockBehaviour.Properties, ? extends GTCropBlock> createFunction
+) {
 
     public MutableComponent getName() {
         return Component.translatable(getNameId());

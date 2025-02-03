@@ -39,7 +39,8 @@ public class GTCropsCrops {
     public static final CropType RABBITBUSH = register("rabbitbush", "rabbitbush", 4, () -> GTItems.STICKY_RESIN);
 
     private static CropType register(String id, int color, int tier, Supplier<ItemLike> drop) {
-        return register(GTCrops.id(id), null, color, tier, 1, 1,
+        return register(GTCrops.id(id), null, color, tier, 1, 1, 1,
+                drop,
                 (block, loot) -> loot.withPool(LootPool.lootPool()
                         .add(LootItem.lootTableItem(drop.get())
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2))))
@@ -50,7 +51,8 @@ public class GTCropsCrops {
     }
 
     private static CropType register(String id, String baseModelPath, int tier, Supplier<ItemLike> drop) {
-        return register(GTCrops.id(id), GTCrops.id("block/" + baseModelPath), -1, tier, 1, 1,
+        return register(GTCrops.id(id), GTCrops.id("block/" + baseModelPath), -1, tier, 1, 1, 1,
+                drop,
                 (block, loot) -> loot.withPool(LootPool.lootPool()
                         .add(LootItem.lootTableItem(drop.get())
                                 .apply(SetItemCountFunction.setCount(UniformGenerator.between(1, 2))))
@@ -61,10 +63,12 @@ public class GTCropsCrops {
     }
 
     public static CropType register(ResourceLocation id, @Nullable ResourceLocation baseModelPath, int tintColor,
-                                    int tier, int defaultGrowth, int defaultGain,
+                                    int tier, int defaultGrowth, int defaultGain, int defaultResistance,
+                                    Supplier<ItemLike> drop,
                                     BiConsumer<GTCropBlock, LootTable.Builder> loot,
                                     BiFunction<CropType, BlockBehaviour.Properties, ? extends GTCropBlock> createFunction) {
-        CropType type = new CropType(id, baseModelPath, tintColor, tier, defaultGrowth, defaultGain, loot, createFunction);
+        CropType type = new CropType(id, baseModelPath, tintColor, tier, defaultGrowth, defaultGain, defaultResistance,
+                drop, loot, createFunction);
         GTCropsRegistries.CROP_TYPES.register(id, type);
         return type;
     }

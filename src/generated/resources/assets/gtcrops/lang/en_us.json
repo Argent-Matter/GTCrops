@@ -12,5 +12,6 @@
   "itemGroup.gtcrops.gt_crops": "GregTech Crops",
   "tooltip.gtcrops.gain": "Gain: %s",
   "tooltip.gtcrops.growth": "Growth: %s",
+  "tooltip.gtcrops.resistance": "Resistance: %s",
   "tooltip.gtcrops.tier": "Tier: %s"
 }
